@@ -16,4 +16,16 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-spring.application.name=authorization
+version: '3'
+
+services:
+  authorization-server:
+    build:
+      context: .
+      dockerfile: build.Dockerfile
+    ports:
+      - "8089:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka1:19092
+      - SPRING_KAFKA_CONSUMER_GROUP_ID=authorization-server

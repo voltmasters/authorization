@@ -16,4 +16,31 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-spring.application.name=authorization
+FROM maven:3-amazoncorretto-21-al2023 as build
+
+# Build Maven project
+WORKDIR /app
+
+COPY pom.xml .
+COPY src src
+
+RUN mvn clean package -DskipTests
+
+FROM amazoncorretto:21-alpine
+
+LABEL maintainer="Subhrodip Mohanta <contact@subhrodip.com>"
+LABEL group="com.subhrodip.voltmasters"
+LABEL artifact="authorization"
+LABEL platform="java"
+LABEL name="Authorization Server"
+LABEL org.opencontainers.image.source="https://github.com/voltmasters/authorization"
+
+ARG JAR_FILE=target/*.jar
+
+COPY --from=build /app/${JAR_FILE} app.jar
+
+# If you are changing server port, be sure to change this as well
+EXPOSE 8080
+
+#Running the application with `prod` profile
+ENTRYPOINT [ "java", "-jar", "-Dspring.profiles.active=prod", "/app.jar" ]
