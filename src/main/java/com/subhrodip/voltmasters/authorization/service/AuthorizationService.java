@@ -3,6 +3,7 @@ package com.subhrodip.voltmasters.authorization.service;
 import com.subhrodip.voltmasters.authorization.config.KafkaTopics;
 import com.subhrodip.voltmasters.authorization.model.AuthorizationRequest;
 import com.subhrodip.voltmasters.authorization.model.AuthorizationResponse;
+import com.subhrodip.voltmasters.authorization.model.ChargingRequest;
 import com.subhrodip.voltmasters.authorization.model.DriverStatus;
 import com.subhrodip.voltmasters.authorization.repository.DriverAuthorizationRepository;
 import com.subhrodip.voltmasters.authorization.repository.StationAuthorizationRepository;
@@ -41,7 +42,7 @@ public class AuthorizationService {
   }
 
   private void createTopology() {
-    KStream<String, AuthorizationRequest> stream =
+    KStream<String, ChargingRequest> stream =
         streamsBuilder.stream(
             KafkaTopics.CHARGE_AUTHORIZATION_INPUT_TOPIC,
             Consumed.with(
@@ -49,7 +50,7 @@ public class AuthorizationService {
                 Serdes.serdeFrom(
                     new JsonSerializer<>(),
                     new ErrorHandlingDeserializer<>(
-                        new JsonDeserializer<>(AuthorizationRequest.class)))));
+                        new JsonDeserializer<>(ChargingRequest.class)))));
 
     stream
         .mapValues(this::processAuthorization)
@@ -63,12 +64,21 @@ public class AuthorizationService {
                         new JsonDeserializer<>(AuthorizationResponse.class)))));
   }
 
-  private AuthorizationResponse processAuthorization(AuthorizationRequest request) {
-    if (request.driverIdentifier() == null || request.driverIdentifier().id() == null) {
+  AuthorizationResponse processAuthorization(ChargingRequest request) {
+
+    AuthorizationRequest payload = request.authorizationRequest();
+
+    if (payload.driverIdentifier() == null || payload.driverIdentifier().id() == null) {
       return new AuthorizationResponse(DriverStatus.Invalid);
     }
 
-    String driverId = request.driverIdentifier().id();
+    String driverId = payload.driverIdentifier().id();
+
+    int length = driverId.length();
+    if (length >= 20 && length <= 80) {
+      return new AuthorizationResponse(DriverStatus.Invalid);
+    }
+
     if (!driverAuthorizationRepository.exists(driverId)) {
       return new AuthorizationResponse(DriverStatus.Unknown);
     }

@@ -7,10 +7,8 @@ import static org.apache.kafka.streams.StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_C
 
 import com.subhrodip.voltmasters.authorization.model.AuthorizationRequest;
 import com.subhrodip.voltmasters.authorization.model.AuthorizationResponse;
-import com.subhrodip.voltmasters.authorization.serdes.AuthorizationRequestDeserializer;
-import com.subhrodip.voltmasters.authorization.serdes.AuthorizationRequestSerializer;
-import com.subhrodip.voltmasters.authorization.serdes.AuthorizationResponseDeserializer;
-import com.subhrodip.voltmasters.authorization.serdes.AuthorizationResponseSerializer;
+import com.subhrodip.voltmasters.authorization.model.ChargingRequest;
+import com.subhrodip.voltmasters.authorization.serdes.*;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.kafka.clients.admin.NewTopic;
@@ -54,6 +52,11 @@ public class KafkaConfig {
   public Serde<AuthorizationResponse> authorizationResponseSerde() {
     return Serdes.serdeFrom(
         new AuthorizationResponseSerializer(), new AuthorizationResponseDeserializer());
+  }
+
+  @Bean
+  public Serde<ChargingRequest> chargingRequestSerde() {
+    return Serdes.serdeFrom(new ChargingRequestSerializer(), new ChargingRequestDeserializer());
   }
 
   @Bean
