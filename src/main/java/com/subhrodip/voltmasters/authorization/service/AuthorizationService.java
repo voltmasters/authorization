@@ -93,7 +93,7 @@ public class AuthorizationService {
     String driverId = payload.driverIdentifier().id();
 
     int length = driverId.length();
-    if (length >= 20 && length <= 80) {
+    if (length < 20 || length > 80) {
       return new AuthorizationResponse(DriverStatus.Invalid);
     }
 
