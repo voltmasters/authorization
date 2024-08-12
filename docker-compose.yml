@@ -23,8 +23,6 @@ services:
     build:
       context: .
       dockerfile: build.Dockerfile
-    ports:
-      - "8089:8080"
     environment:
       - SPRING_PROFILES_ACTIVE=dev
       - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka1:19092
